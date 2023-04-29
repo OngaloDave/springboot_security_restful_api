@@ -17,21 +17,22 @@ import org.springframework.session.jdbc.config.annotation.web.http.EnableJdbcHtt
 
 import javax.sql.DataSource;
 
-@EnableScheduling
+@Configuration
 @EnableJdbcHttpSession
-@SpringBootApplication
-@EnableAutoConfiguration(exclude = {
-    JacksonAutoConfiguration.class,
-    UserDetailsServiceAutoConfiguration.class,
-})
-public class Application {
+public class HttpSessionConfig {
 
-    public static void main(String[] args) {
-        ConfigurableApplicationContext context =
-            SpringApplication.run(Application.class, args);
-        context.getBean(JmsSender.class).bind(Name.SERVER_CORE)
-            .notify("Application startted.");
+    @Autowired
+    private DataSource dataSource;
+
+    @Bean
+    public JdbcOperationsSessionRepository sessionRepository() {
+        JdbcOperationsSessionRepository repository = new JdbcOperationsSessionRepository(dataSource);
+        repository.setTableName("sessions");
+        return repository;
     }
+
+}
+
 
     @Value("file:etc/schema-h2.sql")
     private Resource schemaScript;
